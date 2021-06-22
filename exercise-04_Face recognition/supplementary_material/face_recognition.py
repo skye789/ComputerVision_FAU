@@ -18,7 +18,9 @@ class FaceNet:
     # Predict embedding from a given face image.
     def predict(self, face):
         # Normalize face image using mean subtraction.
-        face = face - (131.0912, 103.8827, 91.4953)
+        # face = face - (131.0912, 103.8827, 91.4953)
+        face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB) - (131.0912,
+                                                        103.8827, 91.4953)
 
         # Forward pass through deep neural network. The input size should be 224 x 224.
         reshaped = np.moveaxis(face, 2, 0)
@@ -157,31 +159,31 @@ class FaceClustering:
         self.cluster_membership = kmean.labels_.tolist()  # Labels of each frame/picture
 
 
-    # # ToDo
-    # # Once the clustering is done, we can re-identify a face by finding its best matching cluster.
-    # def predict(self, face):
-    #     embedding = self.facenet.predict(face)
-    #     N_repeat_embedding = np.repeat([embedding],
-    #                                    repeats=self.num_clusters,
-    #                                    axis=0)
-    #     distances_to_clusters = np.linalg.norm(self.cluster_center - N_repeat_embedding, axis=1)
-    #     predicted_label_idx = np.argmin(distances_to_clusters)
-    #     # label_dict = ['Alan_Ball', 'Manuel_Pellegrini','Marina_Silva','Nancy_Sinatra','Peter_Gilmour']
-    #     return predicted_label_idx, distances_to_clusters
-
-   # ToDo
+    # ToDo
+    # Once the clustering is done, we can re-identify a face by finding its best matching cluster.
     def predict(self, face):
-        temp = np.zeros((1,self.facenet.get_embedding_dimensionality()))
-        temp[0] = self.facenet.predict(face)
-        bf = cv2.BFMatcher()
-        votePool = {}
-        matches = bf.knnMatch(temp.astype(np.float32),self.cluster_center.astype(np.float32),k=self.num_clusters)
+        embedding = self.facenet.predict(face)
+        N_repeat_embedding = np.repeat([embedding],
+                                       repeats=self.num_clusters,
+                                       axis=0)
+        distances_to_clusters = np.linalg.norm(self.cluster_center - N_repeat_embedding, axis=1)
+        predicted_label_idx = np.argmin(distances_to_clusters)
+        # label_dict = ['Alan_Ball', 'Manuel_Pellegrini','Marina_Silva','Nancy_Sinatra','Peter_Gilmour']
+        return predicted_label_idx, distances_to_clusters
 
-        dis = []
-        label = []
-        for m in matches[0]:
-            dis.append(m.distance)
-            label.append(self.cluster_membership[m.trainIdx])
-        idx = np.where(dis==np.min(dis))[0]
-        print(idx)
-        return self.cluster_center[idx], np.min(dis)
+   # # ToDo
+   #  def predict(self, face):
+   #      temp = np.zeros((1,self.facenet.get_embedding_dimensionality()))
+   #      temp[0] = self.facenet.predict(face)
+   #      bf = cv2.BFMatcher()
+   #      votePool = {}
+   #      matches = bf.knnMatch(temp.astype(np.float32),self.cluster_center.astype(np.float32),k=self.num_clusters)
+   #
+   #      dis = []
+   #      label = []
+   #      for m in matches[0]:
+   #          dis.append(m.distance)
+   #          label.append(self.cluster_membership[m.trainIdx])
+   #      idx = np.where(dis==np.min(dis))[0]
+   #      print(idx)
+   #      return self.cluster_center[idx], np.min(dis)
