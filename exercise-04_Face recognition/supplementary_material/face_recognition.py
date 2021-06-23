@@ -161,7 +161,7 @@ class FaceClustering:
         iter = 0
         init_idx = random.sample(range(len(self.embeddings)), self.num_clusters)
         center = self.embeddings[init_idx, :]
-        while (not converge) and (iter < 25):
+        while (not converge) and (iter < self.max_iter):
             # calculate cluster_membership
             cluster_membership = np.empty_like(self.embeddings)
             for i in range(len(self.embeddings)):
@@ -182,9 +182,11 @@ class FaceClustering:
 
             # check converge or not
             iter+=1
-            converge = np.all(new_center == center)
+            # converge = np.all(new_center == center)
+            difference = np.sum(new_center - center)
+            if difference < 1e4:
+                converge = True
             center = new_center
-            print(iter, converge)
 
     # ToDo
     # Once the clustering is done, we can re-identify a face by finding its best matching cluster.
