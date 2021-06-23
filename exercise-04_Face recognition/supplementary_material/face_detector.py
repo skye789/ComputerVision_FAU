@@ -44,7 +44,8 @@ class FaceDetector:
         extend_rect = [extend_top, extend_left, extend_bottom, extend_right]
         extend_crop_img = self.crop_face(image, extend_rect)
 
-        # distance
+        # locate the position of a templatein a new frame by searching for the position with
+        # maximum similarity to the reference
         res = cv2.matchTemplate(extend_crop_img, template, cv2.TM_CCOEFF_NORMED)
         _, max_val, _, max_loc = cv2.minMaxLoc(res)
 

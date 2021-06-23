@@ -8,6 +8,7 @@ from sklearn.neighbors import NearestNeighbors
 from sklearn.cluster import KMeans
 from collections import Counter
 
+
 # FaceNet to extract face embeddings.
 class FaceNet:
 
@@ -81,10 +82,9 @@ class FaceRecognizer:
         embedding = self.facenet.predict(face)
         X = np.append(self.embeddings, [embedding], axis=0)
 
-        nbrs = NearestNeighbors(n_neighbors=self.num_neighbours+1, algorithm='brute').fit(X)
+        nbrs = NearestNeighbors(n_neighbors=self.num_neighbours + 1, algorithm='brute').fit(X)
         distances, indices = nbrs.kneighbors(X)
 
-        #
         idx_to_prediction = indices[-1, 1:]
 
         # posterior probability
@@ -153,11 +153,38 @@ class FaceClustering:
     # Implement the k-means algorithm
     # Store the estimated cluster centers and the labels assigned to the faces.
     def fit(self):
-        kmean = KMeans(n_clusters=self.num_clusters, max_iter=self.max_iter, init='random')
-        kmean.fit(self.embeddings)
-        self.cluster_center = kmean.cluster_centers_
-        self.cluster_membership = kmean.labels_.tolist()  # Labels of each frame/picture
+        # kmean = KMeans(n_clusters=self.num_clusters, max_iter=self.max_iter, init='random')
+        # kmean.fit(self.embeddings)
+        # self.cluster_center = kmean.cluster_centers_
+        # self.cluster_membership = kmean.labels_.tolist()  # Labels of each frame/picture
+        converge = False
+        iter = 0
+        init_idx = random.sample(range(len(self.embeddings)), self.num_clusters)
+        center = self.embeddings[init_idx, :]
+        while (not converge) and (iter < 25):
+            # calculate cluster_membership
+            cluster_membership = np.empty_like(self.embeddings)
+            for i in range(len(self.embeddings)):
+                repeat_embedding = np.repeat([self.embeddings[i]],
+                                             repeats=self.num_clusters,
+                                             axis=0)
+                dist_to_centers = np.linalg.norm(repeat_embedding - center, axis=1)  # num_center
+                center_idx = np.argmin(dist_to_centers)
+                cluster_membership[i] = center[center_idx]
+            self.cluster_membership = cluster_membership
 
+            # update cluster_center
+            new_center = np.empty_like(center)
+            for j in range(len(center)):
+                idx_same_center = cluster_membership == center[j]
+                new_center[j] = np.mean(self.embeddings[idx_same_center], axis=0)
+            self.cluster_center = new_center
+
+            # check converge or not
+            iter+=1
+            converge = np.all(new_center == center)
+            center = new_center
+            print(iter, converge)
 
     # ToDo
     # Once the clustering is done, we can re-identify a face by finding its best matching cluster.
@@ -171,19 +198,19 @@ class FaceClustering:
         # label_dict = ['Alan_Ball', 'Manuel_Pellegrini','Marina_Silva','Nancy_Sinatra','Peter_Gilmour']
         return predicted_label_idx, distances_to_clusters
 
-   # # ToDo
-   #  def predict(self, face):
-   #      temp = np.zeros((1,self.facenet.get_embedding_dimensionality()))
-   #      temp[0] = self.facenet.predict(face)
-   #      bf = cv2.BFMatcher()
-   #      votePool = {}
-   #      matches = bf.knnMatch(temp.astype(np.float32),self.cluster_center.astype(np.float32),k=self.num_clusters)
-   #
-   #      dis = []
-   #      label = []
-   #      for m in matches[0]:
-   #          dis.append(m.distance)
-   #          label.append(self.cluster_membership[m.trainIdx])
-   #      idx = np.where(dis==np.min(dis))[0]
-   #      print(idx)
-   #      return self.cluster_center[idx], np.min(dis)
+# # ToDo
+#  def predict(self, face):
+#      temp = np.zeros((1,self.facenet.get_embedding_dimensionality()))
+#      temp[0] = self.facenet.predict(face)
+#      bf = cv2.BFMatcher()
+#      votePool = {}
+#      matches = bf.knnMatch(temp.astype(np.float32),self.cluster_center.astype(np.float32),k=self.num_clusters)
+#
+#      dis = []
+#      label = []
+#      for m in matches[0]:
+#          dis.append(m.distance)
+#          label.append(self.cluster_membership[m.trainIdx])
+#      idx = np.where(dis==np.min(dis))[0]
+#      print(idx)
+#      return self.cluster_center[idx], np.min(dis)

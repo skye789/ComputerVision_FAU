@@ -19,8 +19,6 @@ def train(name):
     # The video capture input. In case of "None" the default video capture (webcam) is used. Use a filename(s) to read
     # video data from image file (see VideoCapture documentation)
     parser.add_argument('--video', type=str, default="datasets/training_data/" + name + "/%04d.jpg")
-    # Alan_Ball
-    # Nancy_Sinatra
     # parser.add_argument('--video', type=str, default=None)
     # Identity label (only required for face identification)
     parser.add_argument('--label', type=str, default=name)

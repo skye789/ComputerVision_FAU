@@ -18,8 +18,8 @@ if __name__ == '__main__':
     # ident cluster
     # The video capture input. In case of "None" the default video capture (webcam) is used. Use a filename(s) to read
     # video data from image file (see VideoCapture documentation)
-    parser.add_argument('--video', type=str, default="datasets/test_data/Alan_Ball/%04d.jpg")
-    #  Nancy_Sinatra  Marina_Silva Peter_Gilmour Nancy_Sinatra Manuel_Pellegrini Maria_Shriver Al_Pacino
+    parser.add_argument('--video', type=str, default="datasets/test_data/Nancy_Sinatra/%04d.jpg")
+    # Nancy_Sinatra  Marina_Silva Peter_Gilmour Alan_Ball Manuel_Pellegrini Maria_Shriver Al_Pacino
     args = parser.parse_args()
 
     total_num = 0
