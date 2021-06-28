@@ -19,7 +19,7 @@ from student import selective_search
 def main():
     
     # loading a test image from '../data' folder
-    image_path = '../data/classarch/pursuit2.jpg'
+    image_path = '../data/pedestrian.jpg'
     image = skimage.io.imread(image_path)
     print(image.shape)
 
@@ -38,6 +38,7 @@ def main():
         
         # excluding regions smaller than 2000 pixels
         # you can experiment using different values for the same
+        # if r['size'] < 500:
         if r['size'] < 2000:
             continue
         
