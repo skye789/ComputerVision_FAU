@@ -19,10 +19,10 @@ from student import selective_search
 def main():
     
     # loading a test image from '../data' folder
-    image_path = '../data/chrisarch/ca-annun3.jpg'
+    image_path = '../data/classarch/pursuit2.jpg'
     image = skimage.io.imread(image_path)
-    print (image.shape)
-    
+    print(image.shape)
+
     # perform selective search
     image_label, regions = selective_search(
                             image,
